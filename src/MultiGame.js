@@ -11,6 +11,8 @@ function MultiGame() {
 
   const canvasRef = useRef(null);
   const [score, setScore] = useState(0)
+  const [gameIsStarted, setGameIsStarted] = useState(false)
+
   const [hits, setHits] = useState({
     left: 0,
     middle: 0,
@@ -30,6 +32,12 @@ function MultiGame() {
   const [rightPlayerJumping, setRightPlayerJumping] = useState(false)
 
   const [obstacles, setObstacles] = useState([])
+
+  function handleStartGame() {
+    if (!gameIsStarted) {
+      setGameIsStarted(true)
+    }
+  }
 
   function spawnObstacles() {
     if (Math.random() < OBSTACLE_FREQUENCY &&
@@ -97,6 +105,10 @@ function MultiGame() {
   }
 
   function gameLogic() {
+
+    if (!gameIsStarted) {
+      return
+    }
 
     spawnObstacles()
 
@@ -176,24 +188,43 @@ function MultiGame() {
 
     ctx.clearRect(0, 0, GAME_WIDTH, GAME_HEIGHT);
 
-    //Draw player
-    ctx.fillStyle = 'black'
-    ctx.fillRect(leftPlayerPos.x, leftPlayerPos.y, 50, 50);
-    ctx.fillRect(leftPlayerPos.x, leftPlayerPos.y + 20, 50, 50)
+    if (!gameIsStarted) {
 
-    ctx.fillStyle = 'black'
-    ctx.fillRect(middlePlayerPos.x, middlePlayerPos.y, 50, 50);
-    ctx.fillRect(middlePlayerPos.x, middlePlayerPos.y + 20, 50, 50)
+      const text = "Use the Left, Up and Right arrowkeys to jump";
+      const text2 = "Press Left, Up or Right to start"
+      const font = "30px Arial";
+      ctx.font = font;
 
-    ctx.fillStyle = 'black'
-    ctx.fillRect(rightPlayerPos.x, rightPlayerPos.y, 50, 50);
-    ctx.fillRect(rightPlayerPos.x, rightPlayerPos.y + 20, 50, 50)
+      const textWidth = ctx.measureText(text).width;
+      const canvasWidth = GAME_WIDTH;
 
-    //Draw each obstacle
-    ctx.fillStyle = 'black'
-    obstacles.forEach(e => {
-      ctx.fillRect(e.x, e.y, 30, 30)
-    });
+      const x = (canvasWidth - textWidth) / 2;
+      const y = GAME_HEIGHT / 2;
+
+      ctx.fillText(text, x, y);
+      ctx.fillText(text2, x + 75, y + 50)
+
+    } else {
+
+      //Draw player
+      ctx.fillStyle = 'black'
+      ctx.fillRect(leftPlayerPos.x, leftPlayerPos.y, 50, 50);
+      ctx.fillRect(leftPlayerPos.x, leftPlayerPos.y + 20, 50, 50)
+
+      ctx.fillStyle = 'black'
+      ctx.fillRect(middlePlayerPos.x, middlePlayerPos.y, 50, 50);
+      ctx.fillRect(middlePlayerPos.x, middlePlayerPos.y + 20, 50, 50)
+
+      ctx.fillStyle = 'black'
+      ctx.fillRect(rightPlayerPos.x, rightPlayerPos.y, 50, 50);
+      ctx.fillRect(rightPlayerPos.x, rightPlayerPos.y + 20, 50, 50)
+
+      //Draw each obstacle
+      ctx.fillStyle = 'black'
+      obstacles.forEach(e => {
+        ctx.fillRect(e.x, e.y, 30, 30)
+      });
+    }
   }
 
   /**
@@ -204,6 +235,11 @@ function MultiGame() {
     const ctx = canvas.getContext('2d');
 
     const handleKeyDown = (e) => {
+
+      if (e && !gameIsStarted) {
+        setGameIsStarted(true)
+      }
+
       if (e.key === 'ArrowLeft' && !leftPlayerJumping) {
         setLeftPlayerJumping(true);
         setLeftPlayerVel({ ...leftPlayerVel, y: -JUMP_HEIGHT });
@@ -242,6 +278,7 @@ function MultiGame() {
     }, GAME_SPEED);
 
     return () => clearInterval(handle);
+
   }, [leftPlayerJumping, leftPlayerPos, leftPlayerVel,
     middlePlayerJumping, middlePlayerPos, middlePlayerVel,
     rightPlayerJumping, rightPlayerPos, rightPlayerVel]);
