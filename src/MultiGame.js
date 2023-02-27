@@ -8,10 +8,12 @@ function MultiGame() {
   const OBSTACLE_SPEED = 5
   const OBSTACLE_FREQUENCY = 0.1
   const NUM_OBSTACLES = 5
+  const HEALTH_POINTS = 1
 
   const canvasRef = useRef(null);
   const [score, setScore] = useState(0)
   const [gameIsStarted, setGameIsStarted] = useState(false)
+  const [gameIsOver, setGameIsOver] = useState(false)
 
   const [hits, setHits] = useState({
     left: 0,
@@ -22,22 +24,19 @@ function MultiGame() {
   const [leftPlayerPos, setLeftPlayerPos] = useState({ x: 100, y: GAME_HEIGHT })
   const [leftPlayerVel, setLeftPlayerVel] = useState({ x: 0, y: 0 })
   const [leftPlayerJumping, setLeftPlayerJumping] = useState(false)
+  const [leftIsDead, setLeftIsDead] = useState(false)
 
   const [middlePlayerPos, setMiddlePlayerPos] = useState({ x: 500, y: GAME_HEIGHT })
   const [middlePlayerVel, setMiddlePlayerVel] = useState({ x: 0, y: 0 })
   const [middlePlayerJumping, setMiddlePlayerJumping] = useState(false)
+  const [middleIsDead, setMiddleIsDead] = useState(false)
 
   const [rightPlayerPos, setRightPlayerPos] = useState({ x: 900, y: GAME_HEIGHT })
   const [rightPlayerVel, setRightPlayerVel] = useState({ x: 0, y: 0 })
   const [rightPlayerJumping, setRightPlayerJumping] = useState(false)
+  const [rightIsDead, setRightIsDead] = useState(false)
 
   const [obstacles, setObstacles] = useState([])
-
-  function handleStartGame() {
-    if (!gameIsStarted) {
-      setGameIsStarted(true)
-    }
-  }
 
   function spawnObstacles() {
     if (Math.random() < OBSTACLE_FREQUENCY &&
@@ -65,6 +64,58 @@ function MultiGame() {
       return { ...obs, x: obs.x - OBSTACLE_SPEED }
     })
     setObstacles(movedObstacles)
+  }
+
+  function restartGame() {
+    setObstacles([])
+    setScore(0)
+    setGameIsStarted(false)
+    setGameIsOver(false)
+
+    setHits({
+      left: 0,
+      middle: 0,
+      right: 0
+    })
+
+    setLeftPlayerPos({ x: 100, y: GAME_HEIGHT })
+    setLeftPlayerVel({ x: 0, y: 0 })
+    setLeftPlayerJumping(false)
+    setLeftIsDead(false)
+
+    setMiddlePlayerPos({ x: 500, y: GAME_HEIGHT })
+    setMiddlePlayerVel({ x: 0, y: 0 })
+    setMiddlePlayerJumping(false)
+    setMiddleIsDead(false)
+
+    setRightPlayerPos({ x: 900, y: GAME_HEIGHT })
+    setRightPlayerVel({ x: 0, y: 0 })
+    setRightPlayerJumping(false)
+    setRightIsDead(false)
+  }
+
+  function checkDeath() {
+    if (hits.left >= HEALTH_POINTS) {
+      setLeftIsDead(true)
+      setLeftPlayerPos({
+        x: 10000,
+        y: 10000
+      })
+    }
+    if (hits.middle >= HEALTH_POINTS) {
+      setMiddleIsDead(true)
+      setMiddlePlayerPos({
+        x: 10000,
+        y: 10000
+      })
+    }
+    if (hits.right >= HEALTH_POINTS) {
+      setRightIsDead(true)
+      setRightPlayerPos({
+        x: 10000,
+        y: 10000
+      })
+    }
   }
 
   function detectCollission() {
@@ -106,11 +157,12 @@ function MultiGame() {
 
   function gameLogic() {
 
-    if (!gameIsStarted) {
+    if (!gameIsStarted || gameIsOver) {
       return
     }
 
     spawnObstacles()
+    checkDeath()
 
     setLeftPlayerPos((prevState) => ({
       x: prevState.x + leftPlayerVel.x,
@@ -180,6 +232,9 @@ function MultiGame() {
 
     detectCollission()
 
+    if (leftIsDead && middleIsDead && rightIsDead) {
+      setGameIsOver(true)
+    }
   }
 
   function drawLogic() {
@@ -224,6 +279,25 @@ function MultiGame() {
       obstacles.forEach(e => {
         ctx.fillRect(e.x, e.y, 30, 30)
       });
+
+      if (gameIsOver) {
+        const text = "Game Over!";
+        const text2 = "Your score was " + score
+        const text3 = "Press the Down arrowkey to restart"
+        const font = "30px Arial";
+        ctx.font = font;
+
+        const textWidth = ctx.measureText(text).width;
+        const canvasWidth = GAME_WIDTH;
+
+        const x = (canvasWidth - textWidth) / 2;
+        const y = GAME_HEIGHT / 2;
+
+        ctx.fillText(text, x, y);
+        ctx.fillText(text2, x - 25, y + 50)
+        ctx.fillText(text3, x - 125, y + 100)
+
+      }
     }
   }
 
@@ -255,6 +329,9 @@ function MultiGame() {
         setRightPlayerVel({ ...rightPlayerVel, y: -JUMP_HEIGHT });
       }
 
+      if(e.key === 'ArrowDown' && gameIsOver){
+        restartGame()
+      }
     };
 
 
