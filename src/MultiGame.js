@@ -11,7 +11,11 @@ function MultiGame() {
 
   const canvasRef = useRef(null);
   const [score, setScore] = useState(0)
-  const [hits, setHits] = useState(0)
+  const [hits, setHits] = useState({
+    left: 0,
+    middle: 0,
+    right: 0
+  })
 
   const [leftPlayerPos, setLeftPlayerPos] = useState({ x: 100, y: GAME_HEIGHT })
   const [leftPlayerVel, setLeftPlayerVel] = useState({ x: 0, y: 0 })
@@ -56,26 +60,40 @@ function MultiGame() {
   }
 
   function detectCollission() {
-    obstacles.forEach(obs => {
-      if (
-        Math.abs(obs.x - leftPlayerPos.x) < 50 &&
-        Math.abs(obs.y - leftPlayerPos.y < 50) &&
-        !obs.collided ||
-        Math.abs(obs.x - middlePlayerPos.x) < 50 &&
-        Math.abs(obs.y - middlePlayerPos.y < 50) &&
-        !obs.collided ||
-        Math.abs(obs.x - rightPlayerPos.x) < 50 &&
-        Math.abs(obs.y - rightPlayerPos.y < 50) &&
-        !obs.collided) {
 
-        setHits((hits) => hits + 1)
-        const changedObstacles = obstacles.map(o => {
-          return { ...obs, collided: true }
-        })
-        setObstacles(changedObstacles)
+    setObstacles((prevObstacles) =>
+      prevObstacles.map((obs) => {
+        if (
+          Math.abs(obs.x - leftPlayerPos.x) < 50 &&
+          Math.abs(obs.y - leftPlayerPos.y < 50) &&
+          !obs.collidedLeft
+        ) {
 
-      }
-    });
+          setHits((hits) => ({ ...hits, left: hits.left + 1 }))
+          return { ...obs, collidedLeft: true }
+        }
+        else if (
+          Math.abs(obs.x - middlePlayerPos.x) < 50 &&
+          Math.abs(obs.y - middlePlayerPos.y < 50) &&
+          !obs.collidedMiddle
+        ) {
+          setHits((hits) => ({ ...hits, middle: hits.middle + 1 }))
+          return { ...obs, collidedMiddle: true }
+
+        }
+        else if (
+          Math.abs(obs.x - rightPlayerPos.x) < 50 &&
+          Math.abs(obs.y - rightPlayerPos.y < 50) &&
+          !obs.collidedRight
+        ) {
+          setHits((hits) => ({ ...hits, right: hits.right + 1 }))
+          return { ...obs, collidedRight: true }
+
+        } else {
+          return obs;
+        }
+      })
+    )
   }
 
   function gameLogic() {
@@ -225,8 +243,8 @@ function MultiGame() {
 
     return () => clearInterval(handle);
   }, [leftPlayerJumping, leftPlayerPos, leftPlayerVel,
-      middlePlayerJumping, middlePlayerPos, middlePlayerVel,
-      rightPlayerJumping, rightPlayerPos, rightPlayerVel]);
+    middlePlayerJumping, middlePlayerPos, middlePlayerVel,
+    rightPlayerJumping, rightPlayerPos, rightPlayerVel]);
 
   return <div>
     <canvas
@@ -235,10 +253,10 @@ function MultiGame() {
       height={GAME_HEIGHT}
       style={{ border: "2px solid #d3d3d3" }}
     />
-    <p>leftplayerpos x: {leftPlayerPos.x} , {leftPlayerPos.y}</p>
-    <p>middleplayerpos x: {middlePlayerPos.x} , {middlePlayerPos.y}</p>
-    <p>rightplayerpos x: {rightPlayerPos.x} , {rightPlayerPos.y}</p>
-    <p>num hits: {hits}</p>
+    <p>left hits: {hits.left}</p>
+    <p>middle hits: {hits.middle}</p>
+    <p>right hits: {hits.right}</p>
+
   </div>;
 }
 
