@@ -1,6 +1,6 @@
 import './App.css';
 import Game from './Game';
-import MultiGame from './MultiGame'
+import MultiGame from './MultiGame/MultiGame'
 
 function App() {
 
