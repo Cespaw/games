@@ -25,6 +25,7 @@ function MultiGame() {
   const [leftPlayerVel, setLeftPlayerVel] = useState({ x: 0, y: 0 })
   const [leftPlayerJumping, setLeftPlayerJumping] = useState(false)
   const [leftIsDead, setLeftIsDead] = useState(false)
+  const [leftIsDoubleJumping, setLeftIsDoubleJumping] = useState(false)
 
   const [middlePlayerPos, setMiddlePlayerPos] = useState({ x: 500, y: GAME_HEIGHT })
   const [middlePlayerVel, setMiddlePlayerVel] = useState({ x: 0, y: 0 })

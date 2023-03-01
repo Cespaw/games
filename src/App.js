@@ -1,20 +1,21 @@
 import './App.css';
-import Game from './Game';
+import { BrowserRouter as Router, Switch, Route, Routes } from 'react-router-dom';
+import Home from './Home';
+import About from './About';
+import Navigationbar from './Navigationbar';
 import MultiGame from './MultiGame/MultiGame'
+import Navigation from './Navigation';
 
 function App() {
 
   return (
-    <div className='mainDiv'>
-      
-      <MultiGame />
+    <div>
+      <Navigationbar></Navigationbar>
 
-      {/*
-      <Game jumpKey='ArrowLeft'></Game>
-      <Game jumpKey='ArrowUp'></Game>
-      <Game jumpKey='ArrowRight'></Game>
-  */}
-  
+      <div className='mainDiv'>
+        <Navigation></Navigation>
+
+      </div>
     </div>
   );
 }
